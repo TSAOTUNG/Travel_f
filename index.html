@@ -13,19 +13,21 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500&display=swap" rel="stylesheet"> 
+    
     <style>
         /* --- 質感奶油色系 --- */
         :root {
-            --bg-cream: #F9F7F2;      /* 溫潤米白 */
+            --bg-cream: #F9F7F2;      
             --card-white: #FFFFFF;    
-            --text-main: #4A4A4A;     /* 深灰質感 */
+            --text-main: #4A4A4A;     
             --text-sub: #8C8C8C;      
-            --accent-latte: #C7B299;  /* 拿鐵色 */
-            --tag-bg: #F5F5F0;        
+            --accent-latte: #C7B299;  
+            --tag-bg: #F5F5F0;
+            --navy-blue: #1A237E;
         }
 
         body {
-            /* 使用系統原生字體，在手機上閱讀最舒適 */
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans TC", sans-serif;
             background-color: var(--bg-cream);
             color: var(--text-main);
@@ -85,22 +87,39 @@
         
         h1, h2, h3 { font-weight: 700; letter-spacing: -0.02em; }
 
-        /* --- 驚喜彈窗動畫 --- */
-        .modal-enter { opacity: 0; transform: scale(0.9); }
-        .modal-enter-active { opacity: 1; transform: scale(1); transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        /* --- 彈窗動畫 --- */
+        .modal-enter { opacity: 0; transform: scale(0.95) translateY(10px); }
+        .modal-enter-active { opacity: 1; transform: scale(1) translateY(0); transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        
+        /* 撒花特效修正 - 確保從螢幕最上方落下，不卡在中間 */
         .confetti {
-            position: absolute;
+            position: fixed; /* 改成 fixed，確保相對於螢幕定位 */
+            top: -20px;      /* 預設在螢幕上方 */
             width: 10px; 
             height: 10px;
             background-color: #f00;
             animation: confetti-fall 3s linear infinite;
+            z-index: 9999;   /* 確保在最上層 */
+            border-radius: 50%;
+            pointer-events: none; /* 讓點擊可以穿透花瓣 */
         }
         @keyframes confetti-fall {
-            0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
-            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
         }
         
-        /* 簡單的淡入動畫 */
+        /* 機票專用樣式 */
+        .font-oswald { font-family: 'Oswald', sans-serif; letter-spacing: 0.05em; }
+        
+        .ticket-shadow {
+            box-shadow: 0 20px 40px -10px rgba(26, 35, 126, 0.3);
+        }
+        
+        .btn-navy-gradient {
+            background: linear-gradient(to bottom, #212c8f, #1A237E);
+            box-shadow: 0 4px 15px rgba(26, 35, 126, 0.4);
+        }
+
         .fade-in { animation: fadeIn 0.4s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -132,7 +151,7 @@
     </header>
 
     <main id="app-container" class="max-w-md mx-auto pt-44 px-5 relative min-h-screen">
-        </main>
+    </main>
 
     <nav class="fixed bottom-8 left-0 right-0 z-50 flex justify-center">
         <div class="bg-white/95 backdrop-blur-xl rounded-full shadow-lg border border-gray-100 p-1.5 flex items-center gap-1">
@@ -146,28 +165,107 @@
         </div>
     </nav>
 
-    <div id="surprise-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/80 backdrop-blur-sm p-5 overflow-hidden">
-        <div id="modal-content" class="bg-white rounded-3xl p-8 max-w-sm w-full text-center relative overflow-hidden modal-enter shadow-2xl">
-            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-red-400 via-yellow-400 to-blue-400"></div>
+    <div id="surprise-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/80 backdrop-blur-sm p-6 overflow-hidden font-sans">
+        
+        <div id="fake-coupon" class="bg-white rounded-3xl p-8 max-w-sm w-full text-center hidden transform transition-all duration-500 soft-shadow relative">
+            <div class="absolute top-0 right-0 bg-orange-500 text-white text-xs font-bold px-4 py-1.5 rounded-bl-2xl tracking-wider">BOOKING CONFIRMED</div>
             
-            <div class="mb-4 text-6xl">🎉</div>
-            <h2 class="text-3xl font-bold text-red-500 mb-2">媽，你被騙了！</h2>
-            <p class="text-gray-500 text-sm mb-6">根本沒有要去什麼太平山...</p>
+            <div class="mb-4 text-5xl mt-2">🍝</div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-1">Second Floor 貳樓</h2>
+            <p class="text-gray-500 text-sm mb-6 tracking-wide font-medium">桃園華泰店</p>
             
-            <div class="bg-blue-50 rounded-xl p-5 mb-6 border border-blue-100">
-                <p class="text-sm text-gray-400 font-bold uppercase mb-1">THE TRUTH IS</p>
-                <div class="text-2xl font-bold text-blue-800 mb-1">我們要去日本九州！</div>
-                <div class="text-4xl my-2">✈️ 🇯🇵 🍜</div>
-                <p class="text-sm text-blue-600">護照都幫你帶好了<br>羽絨衣是為了去滑雪啦！</p>
+            <div class="bg-orange-50/50 p-5 rounded-2xl mb-6 text-left border border-orange-100/50">
+                <div class="flex justify-between items-center mb-3 border-b border-orange-200/30 pb-3">
+                    <span class="text-sm text-orange-700/70 font-bold">日期 Date</span>
+                    <span class="text-base text-gray-800 font-bold">2026/01/09 (五)</span>
+                </div>
+                <div class="flex justify-between items-center mb-3 border-b border-orange-200/30 pb-3">
+                    <span class="text-sm text-orange-700/70 font-bold">時間 Time</span>
+                    <span class="text-base text-gray-800 font-bold">11:30</span>
+                </div>
+                <div class="flex justify-between items-center mb-2 pb-1">
+                    <span class="text-sm text-orange-700/70 font-bold">人數 Guest</span>
+                    <span class="text-base text-gray-800 font-bold">3 位大人</span>
+                </div>
+                
+                <div class="mt-4 pt-4 border-t-2 border-dashed border-orange-200/50 text-center">
+                    <p class="text-sm text-orange-600 font-bold inline-flex items-center bg-white px-4 py-2 rounded-full shadow-sm">
+                        <i class="fas fa-birthday-cake mr-2 text-orange-400"></i> 壽星招待：專屬甜點乙份
+                    </p>
+                </div>
             </div>
 
-            <button onclick="location.href='https://tsaotung.github.io/Travel/'" class="w-full bg-gray-800 text-white font-bold py-3 rounded-xl hover:scale-95 transition transform">
-                完全沒想到！ <span class="text-xs ml-1 font-normal opacity-70">(查看真實行程)</span>
+            <button onclick="closeModal()" class="w-full bg-gray-100 text-gray-500 font-bold py-3.5 rounded-2xl text-sm hover:bg-gray-200 transition tracking-wide">
+                關閉視窗
             </button>
         </div>
+
+        <div id="real-ticket" class="bg-white rounded-[2rem] w-full max-w-sm hidden relative overflow-hidden transform transition-all duration-700 ticket-shadow">
+            <div class="bg-[#1A237E] h-20 flex items-end px-8 pb-4 justify-between">
+                <div class="text-white font-bold tracking-[0.15em] text-sm flex items-center gap-3">
+                    <i class="fas fa-plane-departure text-lg"></i> BOARDING PASS
+                </div>
+                <div class="text-white/60 text-xs font-bold tracking-wider">ECONOMY</div>
+            </div>
+
+            <div class="px-8 pt-8 pb-6">
+                <div class="flex justify-between items-center mb-10">
+                    <div class="text-left">
+                        <div class="text-5xl font-bold text-[#333] font-oswald leading-none mb-1">TPE</div>
+                        <div class="text-xs font-bold text-gray-400 tracking-wider">TAIPEI</div>
+                    </div>
+                    <div class="flex-1 px-6 text-center relative flex justify-center">
+                        <i class="fas fa-plane text-[#1A237E] text-2xl rotate-90"></i>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-5xl font-bold text-[#333] font-oswald leading-none mb-1">FUK</div>
+                        <div class="text-xs font-bold text-gray-400 tracking-wider">FUKUOKA</div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-y-6 gap-x-4 mb-10">
+                    <div>
+                        <div class="text-[10px] text-gray-400 font-bold tracking-wider uppercase mb-1">Passenger</div>
+                        <div class="font-bold text-gray-800 text-xl tracking-tight">KAMA</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-[10px] text-gray-400 font-bold tracking-wider uppercase mb-1">Date</div>
+                        <div class="font-bold text-gray-800 text-xl font-oswald">09 JAN 26</div>
+                    </div>
+                    <div>
+                        <div class="text-[10px] text-gray-400 font-bold tracking-wider uppercase mb-1">Flight</div>
+                        <div class="font-bold text-[#1A237E] text-xl font-oswald">JX840</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-[10px] text-gray-400 font-bold tracking-wider uppercase mb-1">Gate</div>
+                        <div class="font-bold text-[#1A237E] text-xl font-oswald">J12</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-8 pb-8 text-center relative z-10 bg-white">
+                <h3 class="text-xl font-bold text-[#1A237E] mb-3 tracking-wider">
+                    SURPRISE! 我們要去日本九州！
+                </h3>
+                <p class="text-sm text-[#4A4A4A] leading-relaxed font-medium mb-8">
+                    根本沒有太平山，護照都幫你帶好了！
+                </p>
+                
+                <button onclick="location.href='https://tsaotung.github.io/Travel/'" class="w-full btn-navy-gradient text-white font-bold py-4 rounded-2xl hover:scale-[0.98] transition-all transform text-sm tracking-widest shadow-lg flex items-center justify-center">
+                    查看真實行程 <i class="fas fa-arrow-right ml-2 animate-pulse"></i>
+                </button>
+            </div>
+        </div>
+
     </div>
 
     <script>
+        // ============================================
+        // 設定驚喜觸發時間
+        // ============================================
+        const TARGET_DATE = new Date("2026-01-09T12:00:00"); 
+        // ============================================
+
         // --- 行程資料結構 ---
         const itineraryData = [
             {
@@ -177,9 +275,16 @@
                 events: [
                     { time: "09:00", title: "彰化出發", icon: "fa-car", location: "溫暖的家", desc: "帶著愉快的心情出發！" },
                     { time: "10:30", title: "竹北接姊姊", icon: "fa-user-friends", location: "竹北", desc: "全員集合，往北前進。" },
-                    { time: "11:30", title: "午餐：華泰名品城 Outlet", icon: "fa-shopping-bag", location: "桃園青埔", 
-                      desc: "前往宜蘭前的中繼站，也是最後的「保暖裝備檢查點」。若缺帽子手套請在此買齊！", 
-                      tags: [{type: "food", text: "各國美食"}, {type: "alert", text: "檢查冬衣"}] },
+                    { 
+                        time: "11:30", 
+                        title: "午餐：華泰名品城 Outlet", 
+                        icon: "fa-shopping-bag", 
+                        location: "桃園青埔", 
+                        desc: "前往宜蘭前的中繼站，也是最後的「保暖裝備檢查點」。若缺帽子手套請在此買齊！", 
+                        tags: [{type: "food", text: "義式美食"}, {type: "alert", text: "檢查冬衣"}],
+                        // 驚喜開關
+                        hasSurprise: true 
+                    },
                     { time: "16:00", title: "羅東特色民宿 Check-in", icon: "fa-bed", location: "宜蘭羅東", 
                       desc: "抵達宜蘭，入住溫馨民宿，放置行李。", 
                       tags: [{type: "spot", text: "休息"}] },
@@ -222,7 +327,11 @@
                       desc: "在寒冷山上享用簡單熱食，溫暖身體。" },
                     { time: "15:00", title: "太平山莊 Check-in", icon: "fa-warehouse", location: "太平山莊", 
                       desc: "今晚住在雲端！山上資源珍貴(無暖氣)，入夜後氣溫接近 0 度。", 
-                      tags: [{type: "cold", text: "極度寒冷"}, {type: "spot", text: "無敵雲海"}] }
+                      tags: [{type: "cold", text: "極度寒冷"}, {type: "spot", text: "無敵雲海"}] },
+                    // 修改：Day 3 晚上送姊姊
+                    { time: "18:00", title: "送姊姊去搭車", icon: "fa-car-side", location: "宜蘭/羅東", 
+                      desc: "姊姊要回去上班 QQQQQ", 
+                      tags: [{type: "alert", text: "辛苦了"}, {type: "alert", text: "注意保暖"}] }
                 ]
             },
             {
@@ -250,16 +359,16 @@
                 weather: { temp: "20°C", icon: "fa-sun", label: "溫暖", isCold: false },
                 events: [
                     { time: "11:00", title: "退房", icon: "fa-suitcase", location: "飯店", desc: "睡飽飽，悠閒退房。" },
-                    { time: "12:30", title: "午餐：十一街麵食館", icon: "fa-bowl-rice", location: "竹北", 
-                      desc: "回程順路吃竹北人氣名店，必點葫瓜水餃與滷味。", 
-                      tags: [{type: "food", text: "人氣美食"}] },
-                    { time: "14:00", title: "送姊姊回家", icon: "fa-user", location: "竹北", desc: "下次再一起旅行！" },
-                    { time: "15:30", title: "回到彰化", icon: "fa-home", location: "彰化", desc: "平安抵達溫暖的家。" }
+                    { time: "12:00", title: "最後採買 & 午餐", icon: "fa-gift", location: "礁溪市區", 
+                      desc: "買點宜蘭伴手禮，簡單吃個午餐。", 
+                      tags: [{type: "food", text: "伴手禮"}] },
+                    { time: "14:00", title: "快樂賦歸", icon: "fa-car", location: "國道風光", desc: "帶著滿滿的回憶，開車回彰化。" },
+                    { time: "16:30", title: "抵達溫暖的家", icon: "fa-home", location: "彰化", desc: "平安抵達！" }
                 ]
             }
         ];
 
-        // --- 資訊頁內容 (包含驚喜按鈕) ---
+        // --- 資訊頁內容 ---
         const infoContent = `
             <div class="pb-24 animate-fade-in">
                 <div class="bg-white rounded-3xl p-6 soft-shadow mb-6 border border-gray-50">
@@ -308,11 +417,6 @@
                         <li class="flex items-start"><i class="fas fa-check mt-1 mr-2 opacity-50"></i><span><strong>暈車藥：</strong>上太平山路途蜿蜒，建議事先準備。</span></li>
                     </ul>
                 </div>
-
-                <button onclick="triggerSurprise()" class="w-full bg-gradient-to-r from-[#C7B299] to-[#bca588] text-white font-bold py-4 rounded-3xl shadow-lg flex items-center justify-center space-x-2 active:scale-95 transition-transform">
-                    <i class="fas fa-gift animate-bounce"></i>
-                    <span>✨ 點擊查看隱藏版驚喜</span>
-                </button>
             </div>
         `;
 
@@ -352,6 +456,17 @@
                         event.tags.map(t => `<span class="tag tag-${t.type}">${t.text}</span>`).join('') + 
                         `</div>`;
                 }
+                
+                // 處理驚喜按鈕的邏輯
+                let surpriseBtnHtml = '';
+                if (event.hasSurprise) {
+                    surpriseBtnHtml = `
+                        <button onclick="checkTimeAndSurprise()" class="mt-4 w-full border border-[#C7B299] text-[#a68b70] text-sm py-2.5 rounded-xl hover:bg-[#F9F7F2] transition flex items-center justify-center gap-2 group-hover:bg-[#C7B299] group-hover:text-white">
+                            <i class="fas fa-gift animate-pulse"></i>
+                            <span>領取壽星專屬小禮物</span>
+                        </button>
+                    `;
+                }
 
                 html += `
                     <div class="relative pl-12 mb-6 group">
@@ -369,6 +484,7 @@
                             
                             <p class="text-sm text-gray-500 mb-2 leading-relaxed font-light">${event.desc}</p>
                             ${tagsHtml}
+                            ${surpriseBtnHtml}
                         </div>
                     </div>
                 `;
@@ -402,27 +518,42 @@
         }
 
         // --- 驚喜邏輯 ---
-        function triggerSurprise() {
+        function checkTimeAndSurprise() {
+            const now = new Date();
             const modal = document.getElementById('surprise-modal');
-            const content = document.getElementById('modal-content');
+            const fakeCoupon = document.getElementById('fake-coupon');
+            const realTicket = document.getElementById('real-ticket');
             
             modal.classList.remove('hidden');
             modal.classList.add('flex');
             
-            createConfetti();
+            // 隱藏所有內容，準備顯示
+            fakeCoupon.classList.add('hidden');
+            realTicket.classList.add('hidden');
             
-            setTimeout(() => {
-                content.classList.add('modal-enter-active');
-            }, 10);
+            if (now >= TARGET_DATE) {
+                // 時間到了：顯示真機票 + 撒花
+                realTicket.classList.remove('hidden');
+                setTimeout(() => {
+                    realTicket.classList.add('modal-enter-active');
+                }, 10);
+                createConfetti(); // 呼叫修正後的撒花
+            } else {
+                // 時間未到：顯示 Second Floor 訂位資訊
+                fakeCoupon.classList.remove('hidden');
+                setTimeout(() => {
+                    fakeCoupon.classList.add('modal-enter-active');
+                }, 10);
+            }
         }
 
-        function closeSurprise() {
-            // 這個函數雖然保留著，但目前按鈕已經直接跳轉，不需要它了。
-            // 除非你想做成「關閉後再跳轉」，但直接跳轉比較乾脆。
+        function closeModal() {
             const modal = document.getElementById('surprise-modal');
-            const content = document.getElementById('modal-content');
-            
-            content.classList.remove('modal-enter-active');
+            const fakeCoupon = document.getElementById('fake-coupon');
+            const realTicket = document.getElementById('real-ticket');
+
+            fakeCoupon.classList.remove('modal-enter-active');
+            realTicket.classList.remove('modal-enter-active');
             
             setTimeout(() => {
                 modal.classList.add('hidden');
@@ -431,27 +562,31 @@
             }, 300);
         }
 
+        // 撒花函式 (重要修正：使用 fixed position 並隨機分佈在 body 上)
         function createConfetti() {
             const colors = ['#EF5350', '#EC407A', '#AB47BC', '#7E57C2', '#42A5F5', '#26C6DA', '#26A69A', '#66BB6A', '#FFEE58', '#FFA726', '#FF7043'];
-            const modal = document.getElementById('surprise-modal');
+            const body = document.body; // 改為附加在 body 上
             
-            for(let i=0; i<50; i++) {
+            for(let i=0; i<100; i++) {
                 const conf = document.createElement('div');
                 conf.classList.add('confetti');
                 conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                // 限制在 95vw 避免出現卷軸
-                conf.style.left = Math.random() * 95 + 'vw'; 
+                conf.style.left = Math.random() * 100 + 'vw'; 
+                conf.style.width = (Math.random() * 8 + 5) + 'px';
+                conf.style.height = conf.style.width;
                 conf.style.animationDuration = (Math.random() * 2 + 2) + 's';
                 conf.style.animationDelay = (Math.random() * 1) + 's';
-                modal.appendChild(conf);
+                body.appendChild(conf); // 附加到 body
                 
-                setTimeout(() => conf.remove(), 4000);
+                // 動畫結束後自動移除
+                setTimeout(() => {
+                    conf.remove();
+                }, 5000);
             }
         }
-
+        
         // 初始化
         renderDay(0);
-
     </script>
 </body>
 </html>
